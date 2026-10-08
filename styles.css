@@ -98,6 +98,14 @@ form label, .input-panel>label { display: block; font-size: 12px; font-weight: 8
 .vector-inputs label { margin: 0; }
 .vector-inputs input { display: block; border: 1px solid #dfe3d7; border-radius: 6px; padding: 9px; width: 100px; margin-top: 5px; }
 .image-submit { margin: 17px 0 0; }
+.upload-box { display: flex; align-items: center; gap: 15px; border: 1px dashed #b9c7a4; border-radius: 10px; background: #f8faef; padding: 20px; }
+.upload-symbol { width: 48px; height: 48px; border-radius: 10px; background: #e5f2b5; display: grid; place-items: center; color: #5b792e; font-size: 28px; flex-shrink: 0; }
+.upload-copy { display: grid; gap: 5px; min-width: 0; }
+.upload-copy strong { font-size: 13px; }
+.upload-copy small { color: #7c8774; font-size: 11px; overflow-wrap: anywhere; }
+.upload-box input[type=file] { margin-left: auto; max-width: 255px; font-size: 11px; color: #66715f; }
+.upload-box input[type=file]::file-selector-button { border: 0; border-radius: 6px; background: #20241f; color: #fff; font: inherit; font-weight: 700; padding: 9px 12px; margin-right: 8px; cursor: pointer; }
+.image-preview { display: block; margin-top: 14px; max-width: 100%; max-height: 220px; border-radius: 8px; object-fit: contain; background: #f4f5ef; border: 1px solid #e7e9e1; }
 
 .results-section { padding: 51px 0 67px; }
 .results-heading { display: flex; align-items: end; justify-content: space-between; }
@@ -178,6 +186,9 @@ dialog::backdrop { background: #171b17b8; }
   .search-input-wrap { flex-wrap: wrap; padding: 5px; } .search-input-wrap input { height: 45px; width: calc(100% - 50px); }
   .search-input-wrap>span { padding: 0 12px; } .submit-button { flex-basis: 100%; margin: 0; }
   .image-presets { grid-template-columns: 1fr; } .vector-inputs input { width: 75px; }
+  .upload-box { align-items: flex-start; flex-wrap: wrap; padding: 15px; }
+  .upload-copy { flex: 1; }
+  .upload-box input[type=file] { margin-left: 0; width: 100%; max-width: none; }
   .results-section { padding: 35px 0; } .results-heading h2 { font-size: 24px; }
   .product-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
   .product-art { height: 140px; } .product-body { padding: 12px; }

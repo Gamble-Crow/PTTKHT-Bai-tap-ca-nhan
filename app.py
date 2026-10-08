@@ -1,4 +1,4 @@
-"""Local Python HTTP server for Hieu Ecommerce Shop (standard library only)."""
+"""Local Python HTTP server for Hieu Ecommerce Shop."""
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -57,7 +57,21 @@ class ShopHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_POST(self):
-        if urlsplit(self.path).path != "/api/search":
+        path = urlsplit(self.path).path
+        if path == "/api/search/image":
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                if length <= 0:
+                    raise InputError("Hãy chọn một ảnh sản phẩm.")
+                if length > SHOP.images.MAX_BYTES:
+                    raise InputError("Ảnh quá lớn. Hãy chọn ảnh dưới 5 MB.")
+                result = SHOP.search_image_bytes(self.rfile.read(length))
+            except (InputError, ValueError) as error:
+                self.send_json(400, {"error": str(error)})
+                return
+            self.send_json(200, result)
+            return
+        if path != "/api/search":
             self.send_json(404, {"error": "Không tìm thấy đường dẫn."})
             return
         try:

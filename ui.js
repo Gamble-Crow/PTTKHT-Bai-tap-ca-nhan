@@ -18,6 +18,11 @@ const ShopClient = {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ mode, value })
+  }),
+  searchImageFile: file => requestJson('/api/search/image', {
+    method: 'POST',
+    headers: { 'Content-Type': file.type || 'application/octet-stream' },
+    body: file
   })
 };
 
@@ -98,14 +103,21 @@ $('#nav-products').addEventListener('click', () => setSurface('product'));
 $('#nav-orders').addEventListener('click', () => setSurface('order'));
 $('#reset-button').addEventListener('click', showAll);
 
-document.querySelectorAll('.preset').forEach(button => button.addEventListener('click', () => {
-  document.querySelectorAll('.preset').forEach(preset => {
-    const chosen = preset === button;
-    preset.classList.toggle('chosen', chosen);
-    preset.setAttribute('aria-checked', String(chosen));
-  });
-  button.dataset.vector.split(',').forEach((value, index) => { $(`#vector-${index}`).value = value; });
-}));
+let imagePreviewUrl = null;
+$('#image-file').addEventListener('change', () => {
+  if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+  const file = $('#image-file').files[0];
+  $('#image-file-name').textContent = file ? file.name : 'JPG, PNG hoặc WebP · tối đa 5 MB';
+  $('#image-preview').classList.toggle('hidden', !file);
+  if (file) {
+    imagePreviewUrl = URL.createObjectURL(file);
+    $('#image-preview').src = imagePreviewUrl;
+  } else {
+    imagePreviewUrl = null;
+    $('#image-preview').removeAttribute('src');
+  }
+  showError('#search-error', '');
+});
 
 $('#search-form').addEventListener('submit', async event => {
   event.preventDefault();
@@ -114,12 +126,18 @@ $('#search-form').addEventListener('submit', async event => {
     let output;
     if (activeMode === 'text') output = await ShopClient.search('text', $('#keyword').value);
     else if (activeMode === 'voice') output = await ShopClient.search('voice', $('#transcript').value);
-    else output = await ShopClient.search('image', [0, 1, 2].map(index => $(`#vector-${index}`).value));
+    else {
+      const file = $('#image-file').files[0];
+      if (!file) throw new Error('Hãy chọn một ảnh sản phẩm.');
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.');
+      if (file.size > 5_000_000) throw new Error('Ảnh quá lớn. Hãy chọn ảnh dưới 5 MB.');
+      output = await ShopClient.searchImageFile(file);
+    }
     renderProducts(output.results);
     $('#results-title').innerHTML = `Kết quả tìm kiếm <span id="result-count">${output.results.length}</span>`;
     $('#result-description').textContent = output.results.length ? 'Sắp xếp theo điểm phù hợp, cùng điểm thì theo mã sản phẩm.' : 'Không có kết quả phù hợp với truy vấn này.';
     const summary = $('#query-summary');
-    summary.textContent = `${activeMode === 'text' ? 'Từ khóa' : activeMode === 'voice' ? 'Bản ghi lời nói' : 'Vector ảnh'}: ${output.query.interpreted} · ${output.results.length} kết quả`;
+    summary.textContent = `${activeMode === 'text' ? 'Từ khóa' : activeMode === 'voice' ? 'Bản ghi lời nói' : 'Ảnh tải lên'}: ${activeMode === 'image' ? $('#image-file').files[0].name : output.query.interpreted} · ${output.results.length} kết quả`;
     summary.classList.remove('hidden');
     $('#reset-button').classList.remove('hidden');
     $('#results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });

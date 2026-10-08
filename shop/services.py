@@ -1,9 +1,13 @@
 """Query conversion, retrieval and ranking specified by the assignment."""
 
 from dataclasses import dataclass
+from io import BytesIO
 from math import isfinite, sqrt
 import re
+from statistics import median
 import unicodedata
+
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 from .data import OrderRepository, ProductRepository, VectorIndex
 
@@ -43,6 +47,9 @@ class SpeechService:
 
 
 class ImageService:
+    MAX_BYTES = 5_000_000
+    MAX_PIXELS = 12_000_000
+
     def encode(self, values):
         if not isinstance(values, (list, tuple)) or len(values) != 3:
             raise InputError("Vector ảnh phải có đúng 3 số không âm.")
@@ -53,6 +60,74 @@ class ImageService:
         if any(not isfinite(value) or value < 0 for value in vector) or not any(vector):
             raise InputError("Vector ảnh phải có 3 số không âm và ít nhất một số lớn hơn 0.")
         return vector
+
+    def encode_image(self, image_bytes):
+        """Estimate the assignment's shoe/bag/clothing vector from one image.
+
+        This small local baseline uses the foreground silhouette, not a trained
+        recognition model. It works best for one item on a plain background.
+        """
+        if not image_bytes:
+            raise InputError("Hãy chọn một ảnh sản phẩm.")
+        if len(image_bytes) > self.MAX_BYTES:
+            raise InputError("Ảnh quá lớn. Hãy chọn ảnh dưới 5 MB.")
+        try:
+            with Image.open(BytesIO(image_bytes)) as source:
+                if source.format not in {"JPEG", "PNG", "WEBP"}:
+                    raise InputError("Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.")
+                if source.width * source.height > self.MAX_PIXELS:
+                    raise InputError("Ảnh có độ phân giải quá lớn.")
+                oriented = ImageOps.exif_transpose(source)
+                if "A" in oriented.getbands():
+                    rgba = oriented.convert("RGBA")
+                    background = Image.new("RGBA", rgba.size, "white")
+                    background.alpha_composite(rgba)
+                    image = background.convert("RGB")
+                else:
+                    image = oriented.convert("RGB")
+        except (UnidentifiedImageError, OSError, ValueError) as error:
+            raise InputError("Không đọc được ảnh. Hãy chọn tệp JPG, PNG hoặc WebP hợp lệ.") from error
+
+        image.thumbnail((256, 256))
+        width, height = image.size
+        if width < 24 or height < 24:
+            raise InputError("Ảnh quá nhỏ để tìm kiếm.")
+        pixels = image.load()
+        step = max(1, min(width, height) // 32)
+        border = ([pixels[x, 0] for x in range(0, width, step)]
+                  + [pixels[x, height - 1] for x in range(0, width, step)]
+                  + [pixels[0, y] for y in range(0, height, step)]
+                  + [pixels[width - 1, y] for y in range(0, height, step)])
+        background = tuple(median(pixel[channel] for pixel in border) for channel in range(3))
+        foreground = []
+        for y in range(height):
+            for x in range(width):
+                color = pixels[x, y]
+                if sum(abs(color[channel] - background[channel]) for channel in range(3)) > 105:
+                    foreground.append((x, y))
+        if len(foreground) < max(30, width * height // 200):
+            raise InputError("Không nhận ra sản phẩm trong ảnh. Hãy thử ảnh có nền đơn giản.")
+
+        left = min(x for x, _ in foreground)
+        right = max(x for x, _ in foreground)
+        top = min(y for _, y in foreground)
+        bottom = max(y for _, y in foreground)
+        box_width, box_height = right - left + 1, bottom - top + 1
+        aspect = box_width / box_height
+        fill = len(foreground) / (box_width * box_height)
+        top_pixels = [x for x, y in foreground if y < top + box_height * 0.35]
+        bottom_pixels = [x for x, y in foreground if y > bottom - box_height * 0.35]
+        top_span = (max(top_pixels) - min(top_pixels) + 1) / box_width if top_pixels else 0
+        bottom_span = (max(bottom_pixels) - min(bottom_pixels) + 1) / box_width if bottom_pixels else 0
+        shoulder = max(0.0, top_span - bottom_span)
+
+        shoe = max(0.01, min(1.0, (aspect - 1.2) / 0.8))
+        bag = max(0.01, min(1.0, (1.15 - aspect) / 0.55))
+        clothing = max(0.01, 1.0 - abs(aspect - 1.05) / 0.65) * (1.0 + shoulder)
+        if aspect > 1.5 and fill > 0.78:  # A flat, rectangular wallet.
+            bag = max(bag, 0.85)
+            shoe *= 0.2
+        return self.encode((shoe, bag, clothing))
 
 
 class QueryService:
@@ -141,5 +216,12 @@ class ShopService:
             query = self.queries.image_query(self.images.encode(value))
         else:
             raise InputError("Phương thức tìm kiếm không hợp lệ.")
+        return self._search_query(query)
+
+    def search_image_bytes(self, image_bytes):
+        vector = self.images.encode_image(image_bytes)
+        return self._search_query(self.queries.image_query(vector))
+
+    def _search_query(self, query):
         candidates = self.searcher.retrieve(query)
         return {"query": query.as_dict(), "results": self.ranker.rank(query, candidates)}
