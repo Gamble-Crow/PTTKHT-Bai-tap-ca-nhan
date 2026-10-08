@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#20241f" />
+  <meta name="description" content="Hieu Ecommerce Shop — tìm sản phẩm bằng từ khóa, lời nói hoặc vector ảnh mô phỏng và tra cứu đơn hàng." />
+  <title>Hieu Ecommerce Shop — Tìm kiếm sản phẩm</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='17' fill='%2320241f'/%3E%3Cpath d='M16 25h32l-3 27H19z' fill='%23d8f36a'/%3E%3Cpath d='M24 27v-7a8 8 0 0 1 16 0v7' fill='none' stroke='%23d8f36a' stroke-width='4'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="ui.js"></script>
+</head>
+<body>
+  <div class="announcement">BẢN MẪU TÌM KIẾM ĐA PHƯƠNG THỨC <span>·</span> 10 SẢN PHẨM CÓ SẴN</div>
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="Hieu Ecommerce Shop, về trang tìm kiếm"><span class="brand-mark">H<span>✦</span></span><span>Hieu<span class="brand-light"> Ecommerce</span><br><strong>Shop.</strong></span></a>
+    <nav aria-label="Điều hướng chính"><a href="#search-section" id="nav-products" class="active">Sản phẩm</a><a href="#order-panel" id="nav-orders">Tra cứu đơn hàng</a></nav>
+    <span class="header-note">Khám phá theo cách của bạn <span aria-hidden="true">↗</span></span>
+  </header>
+
+  <main>
+    <section class="intro" id="search-section">
+      <div class="intro-copy"><div class="eyebrow"><span class="eyebrow-dot"></span> HIEU ECOMMERCE SHOP</div><h1>Tìm đúng món đồ.<br><em>Theo cách của bạn.</em></h1><p>Nhập từ khóa, dùng lời nói hoặc thử tìm kiếm ảnh mô phỏng. Mỗi kết quả đều có điểm xếp hạng rõ ràng.</p></div>
+      <div class="intro-decoration" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="sparkle s1">✳</div><div class="sparkle s2">✦</div><div class="search-graphic"><span>⌕</span></div><div class="decor-label">SEARCH / DISCOVER / FIND</div></div>
+    </section>
+
+    <section class="workbench" aria-label="Tìm kiếm và tra cứu">
+      <div class="surface-tabs" role="tablist" aria-label="Loại tra cứu"><button role="tab" aria-selected="true" id="product-tab" aria-controls="product-panel" class="selected">Tìm sản phẩm <span>↗</span></button><button role="tab" aria-selected="false" id="order-tab" aria-controls="order-panel">Tra cứu đơn hàng <span>↗</span></button></div>
+      <div id="product-panel" role="tabpanel" aria-labelledby="product-tab">
+        <div class="mode-header"><div><span class="section-kicker">01 / TÌM KIẾM</span><h2>Bạn muốn tìm bằng cách nào?</h2></div><div class="mode-note">Ba cách tìm kiếm, một danh sách kết quả.</div></div>
+        <div class="mode-switch" role="tablist" aria-label="Phương thức tìm sản phẩm"><button type="button" class="mode active" data-mode="text" role="tab" aria-selected="true"><span class="mode-icon">⌕</span><span>Từ khóa</span></button><button type="button" class="mode" data-mode="voice" role="tab" aria-selected="false"><span class="mode-icon">♫</span><span>Giọng nói</span></button><button type="button" class="mode" data-mode="image" role="tab" aria-selected="false"><span class="mode-icon">▧</span><span>Ảnh mô phỏng</span></button></div>
+        <form id="search-form" novalidate>
+          <div class="input-panel" id="text-input-panel"><label for="keyword">Từ khóa sản phẩm</label><div class="search-input-wrap"><span aria-hidden="true">⌕</span><input id="keyword" type="search" placeholder="Thử “black running shoes”" autocomplete="off" /><button class="submit-button" type="submit">Tìm sản phẩm <span aria-hidden="true">→</span></button></div><p class="helper">Tìm trong tên, loại và màu sắc. Ví dụ: black running shoes, backpack, hoodie.</p></div>
+          <div class="input-panel hidden" id="voice-input-panel"><label for="transcript">Lời nói đã chuyển thành văn bản</label><div class="search-input-wrap"><span aria-hidden="true">♫</span><input id="transcript" type="text" placeholder="Ví dụ: find white running shoes" autocomplete="off" /><button id="mic-button" type="button" title="Thử nhận dạng giọng nói trong trình duyệt" aria-label="Bật micro">🎙</button><button class="submit-button" type="submit">Tìm sản phẩm <span aria-hidden="true">→</span></button></div><p class="helper">Bạn có thể nhập bản ghi lời nói. Nút micro hoạt động khi trình duyệt hỗ trợ nhận dạng giọng nói.</p></div>
+          <div class="input-panel hidden" id="image-input-panel"><label>Chọn vector ảnh mẫu</label><div id="image-presets" class="image-presets" role="radiogroup" aria-label="Vector ảnh mẫu"><button type="button" class="preset chosen" role="radio" aria-checked="true" data-vector="1,0,0"><span class="preset-symbol">◒</span><span>Giày thể thao</span><small>(1, 0, 0)</small></button><button type="button" class="preset" role="radio" aria-checked="false" data-vector="0,1,0"><span class="preset-symbol">▣</span><span>Túi / ba lô</span><small>(0, 1, 0)</small></button><button type="button" class="preset" role="radio" aria-checked="false" data-vector="0,0,1"><span class="preset-symbol">♧</span><span>Trang phục</span><small>(0, 0, 1)</small></button></div><details class="vector-details"><summary>Nhập vector 3 chiều tùy chỉnh</summary><div class="vector-inputs"><label>Giày<input type="number" id="vector-0" min="0" step="any" value="1" /></label><label>Túi<input type="number" id="vector-1" min="0" step="any" value="0" /></label><label>Trang phục<input type="number" id="vector-2" min="0" step="any" value="0" /></label></div></details><p class="helper">Đây là vector đặc trưng mô phỏng theo tài liệu, chưa phân tích ảnh tải lên. Độ tương đồng tính bằng cosine.</p><button class="submit-button image-submit" type="submit">Tìm sản phẩm tương tự <span aria-hidden="true">→</span></button></div>
+        </form>
+        <p id="search-error" class="error-message hidden" role="alert"></p>
+      </div>
+
+      <div id="order-panel" role="tabpanel" aria-labelledby="order-tab" class="hidden"><div class="mode-header"><div><span class="section-kicker">02 / ĐƠN HÀNG</span><h2>Kiểm tra đơn hàng của bạn</h2></div><div class="mode-note">Mã demo: O001, O002, O003.</div></div><form id="order-form" novalidate><label for="order-id">Mã đơn hàng</label><div class="search-input-wrap"><span aria-hidden="true">#</span><input id="order-id" type="text" placeholder="Nhập O001" autocomplete="off" /><button class="submit-button" type="submit">Tra cứu <span aria-hidden="true">→</span></button></div></form><p id="order-error" class="error-message hidden" role="alert"></p><div id="order-result" aria-live="polite"></div></div>
+    </section>
+
+    <section id="results-section" class="results-section"><div class="results-heading"><div><span class="section-kicker">DANH MỤC / KẾT QUẢ</span><h2 id="results-title">Khám phá sản phẩm <span id="result-count">10</span></h2><p id="result-description">Mười sản phẩm mẫu từ tài liệu, sẵn sàng để tìm kiếm.</p></div><button id="reset-button" type="button" class="reset-button hidden">Xem tất cả <span aria-hidden="true">↗</span></button></div><div id="query-summary" class="query-summary hidden" aria-live="polite"></div><div id="product-grid" class="product-grid" aria-live="polite"></div></section>
+  </main>
+
+  <footer><div class="footer-brand">Hieu Ecommerce Shop<span>.</span></div><p>Bản mẫu local theo tài liệu A6_V2_04_HieuBT.150.</p><span>SEARCH SMARTER · SHOP EASIER</span></footer>
+  <dialog id="product-dialog" aria-labelledby="dialog-title"><button id="dialog-close" class="dialog-close" type="button" aria-label="Đóng chi tiết">×</button><div id="dialog-content"></div></dialog>
+</body>
+</html>
